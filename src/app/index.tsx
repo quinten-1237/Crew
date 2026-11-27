@@ -51,8 +51,9 @@ const dashboardSections = [
 
 export default function HomeScreen() {
   const { width } = useWindowDimensions();
-  const isMobile = width < 640;
-  const cardWidth = width < 720 ? '100%' : width < 1240 ? '48%' : '31.5%';
+  const isMobile = width < 768;
+  const isTablet = width >= 768 && width < 1024;
+  const cardWidth = isMobile ? '100%' : isTablet ? '48%' : '31.5%';
 
   return (
     <ScrollView
@@ -60,7 +61,7 @@ export default function HomeScreen() {
       contentContainerStyle={[
         styles.content,
         {
-          paddingHorizontal: isMobile ? 20 : width < 1100 ? 32 : 48,
+          paddingHorizontal: isMobile ? 20 : isTablet || width < 1280 ? 32 : 48,
           paddingBottom: isMobile ? 124 : 56,
         },
       ]}>
@@ -75,7 +76,12 @@ export default function HomeScreen() {
         </View>
       </View>
 
-      <View style={[styles.hero, isMobile && styles.heroMobile]}>
+      <View
+        style={[
+          styles.hero,
+          isTablet && styles.heroTablet,
+          isMobile && styles.heroMobile,
+        ]}>
         <View style={styles.heroCopy}>
           <View style={styles.heroEyebrow}>
             <View style={styles.heroEyebrowDot} />
@@ -96,7 +102,11 @@ export default function HomeScreen() {
         <View
           accessible={false}
           pointerEvents="none"
-          style={[styles.heroArtwork, isMobile && styles.heroArtworkMobile]}>
+          style={[
+            styles.heroArtwork,
+            isTablet && styles.heroArtworkTablet,
+            isMobile && styles.heroArtworkMobile,
+          ]}>
           <View style={styles.artOrbitLarge} />
           <View style={styles.artOrbitSmall} />
           <View style={styles.artSparkleOne}>
@@ -123,7 +133,7 @@ export default function HomeScreen() {
       </View>
 
       <View style={styles.sectionHeader}>
-        <View>
+        <View style={styles.sectionHeaderCopy}>
           <Text style={styles.sectionTitle}>Alles voor jullie plannen</Text>
           <Text style={styles.sectionDescription}>
             De belangrijkste onderdelen van Crew, overzichtelijk bij elkaar.
@@ -134,7 +144,11 @@ export default function HomeScreen() {
         </View>
       </View>
 
-      <View style={styles.cardGrid}>
+      <View
+        style={[
+          styles.cardGrid,
+          !isMobile && !isTablet && styles.cardGridDesktop,
+        ]}>
         {dashboardSections.map((section) => (
           <View
             key={section.title}
@@ -165,7 +179,7 @@ const styles = StyleSheet.create({
   },
   content: {
     width: '100%',
-    maxWidth: 1440,
+    maxWidth: 1280,
     alignSelf: 'center',
     paddingTop: 36,
   },
@@ -233,6 +247,11 @@ const styles = StyleSheet.create({
     paddingTop: 27,
     paddingBottom: 12,
     marginBottom: 34,
+  },
+  heroTablet: {
+    minHeight: 292,
+    paddingHorizontal: 28,
+    paddingVertical: 28,
   },
   heroCopy: {
     zIndex: 1,
@@ -305,6 +324,11 @@ const styles = StyleSheet.create({
     height: 148,
     marginLeft: 0,
     marginTop: 12,
+  },
+  heroArtworkTablet: {
+    width: 240,
+    height: 210,
+    marginLeft: 12,
   },
   artOrbitLarge: {
     position: 'absolute',
@@ -439,6 +463,11 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     alignItems: 'center',
     marginBottom: 18,
+    gap: 16,
+  },
+  sectionHeaderCopy: {
+    flex: 1,
+    minWidth: 0,
   },
   sectionTitle: {
     color: '#EDF4FB',
@@ -470,6 +499,10 @@ const styles = StyleSheet.create({
     flexWrap: 'wrap',
     justifyContent: 'space-between',
     rowGap: 16,
+  },
+  cardGridDesktop: {
+    justifyContent: 'flex-start',
+    columnGap: 16,
   },
   sectionCard: {
     position: 'relative',

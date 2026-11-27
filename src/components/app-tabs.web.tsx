@@ -21,100 +21,131 @@ const disabledItems = [
 
 function NavButton({ children, icon, isFocused, ...props }: NavButtonProps) {
   const { width } = useWindowDimensions();
-  const isDesktop = width >= 960;
+  const isTablet = width >= 768 && width < 1024;
+  const isDesktop = width >= 1024;
 
   return (
     <Pressable
       {...props}
       style={({ pressed }) => [
         styles.navButton,
-        isDesktop ? styles.desktopNavButton : styles.mobileNavButton,
+        isDesktop
+          ? styles.desktopNavButton
+          : isTablet
+            ? styles.tabletNavButton
+            : styles.mobileNavButton,
         isFocused && styles.navButtonActive,
         pressed && styles.navButtonPressed,
       ]}>
       <Text style={[styles.navIcon, isFocused && styles.navIconActive]}>{icon}</Text>
-      <Text style={[styles.navLabel, isFocused && styles.navLabelActive]}>{children}</Text>
+      <Text numberOfLines={1} style={[styles.navLabel, isFocused && styles.navLabelActive]}>
+        {children}
+      </Text>
       {isDesktop && isFocused && <View style={styles.activeIndicator} />}
+      {isTablet && isFocused && <View style={styles.tabletActiveIndicator} />}
     </Pressable>
   );
 }
 
 function DisabledNavItem({ icon, label }: (typeof disabledItems)[number]) {
   const { width } = useWindowDimensions();
-  const isDesktop = width >= 960;
+  const isTablet = width >= 768 && width < 1024;
+  const isDesktop = width >= 1024;
 
   return (
     <View
       accessible
       accessibilityRole="text"
       accessibilityState={{ disabled: true }}
-      style={[styles.navButton, isDesktop ? styles.desktopNavButton : styles.mobileNavButton]}>
+      style={[
+        styles.navButton,
+        isDesktop
+          ? styles.desktopNavButton
+          : isTablet
+            ? styles.tabletNavButton
+            : styles.mobileNavButton,
+      ]}>
       <Text style={styles.navIcon}>{icon}</Text>
-      <Text style={styles.disabledNavLabel}>{label}</Text>
+      <Text numberOfLines={1} style={styles.disabledNavLabel}>
+        {label}
+      </Text>
     </View>
   );
 }
 
 export default function AppTabs() {
   const { width } = useWindowDimensions();
-  const isDesktop = width >= 960;
+  const isTablet = width >= 768 && width < 1024;
+  const isDesktop = width >= 1024;
+  const isMobile = !isTablet && !isDesktop;
 
   return (
     <Tabs>
-      <TabSlot style={[styles.tabSlot, isDesktop ? styles.desktopTabSlot : styles.mobileTabSlot]} />
+      <TabSlot
+        style={[
+          styles.tabSlot,
+          isDesktop
+            ? styles.desktopTabSlot
+            : isTablet
+              ? styles.tabletTabSlot
+              : styles.mobileTabSlot,
+        ]}
+      />
       <TabList asChild>
         <View
           style={StyleSheet.flatten([
             styles.navigation,
-            isDesktop ? styles.sidebar : styles.mobileNavigation,
+            isDesktop
+              ? styles.sidebar
+              : isTablet
+                ? styles.tabletNavigation
+                : styles.mobileNavigation,
           ])}>
           {isDesktop ? (
-            <>
-              <View style={styles.brand}>
-                <View style={styles.brandMark}>
-                  <Text style={styles.brandMarkText}>C</Text>
-                </View>
-                <View>
-                  <Text style={styles.brandName}>Crew</Text>
-                  <Text style={styles.brandTagline}>Samen wordt het een plan</Text>
-                </View>
+            <View style={styles.brand}>
+              <View style={styles.brandMark}>
+                <Text style={styles.brandMarkText}>C</Text>
               </View>
-
-              <Text style={styles.navSectionLabel}>JOUW CREW</Text>
-              <TabTrigger name="home" href="/" asChild>
-                <NavButton icon="⌂">Overzicht</NavButton>
-              </TabTrigger>
-              {disabledItems.map((item) => (
-                <DisabledNavItem key={item.label} {...item} />
-              ))}
-
-              <View style={styles.sidebarSpacer} />
-              <Text style={styles.navSectionLabel}>ONTDEK</Text>
-              <TabTrigger name="explore" href="/explore" asChild>
-                <NavButton icon="✧">Verkennen</NavButton>
-              </TabTrigger>
-
-              <View style={styles.sidebarFooter}>
-                <View style={styles.footerAvatar}>
-                  <Text style={styles.footerAvatarText}>C</Text>
-                </View>
-                <View>
-                  <Text style={styles.footerTitle}>Jouw ruimte</Text>
-                  <Text style={styles.footerSubtitle}>Samen plannen, samen doen</Text>
-                </View>
+              <View>
+                <Text style={styles.brandName}>Crew</Text>
+                <Text style={styles.brandTagline}>Samen wordt het een plan</Text>
               </View>
-            </>
-          ) : (
-            <>
-              <TabTrigger name="home" href="/" asChild>
-                <NavButton icon="⌂">Home</NavButton>
-              </TabTrigger>
-              <DisabledNavItem icon="▦" label="Agenda" />
-              <DisabledNavItem icon="♧" label="Groepen" />
-              <TabTrigger name="explore" href="/explore" asChild>
-                <NavButton icon="✧">Ontdek</NavButton>
-              </TabTrigger>
-            </>
+            </View>
+          ) : isTablet ? (
+            <View style={styles.tabletBrand}>
+              <View style={styles.tabletBrandMark}>
+                <Text style={styles.brandMarkText}>C</Text>
+              </View>
+              <View>
+                <Text style={styles.tabletBrandName}>Crew</Text>
+                <Text style={styles.tabletBrandTagline}>Samen plannen</Text>
+              </View>
+            </View>
+          ) : null}
+
+          {isDesktop && <Text style={styles.navSectionLabel}>JOUW CREW</Text>}
+          <TabTrigger key="home" name="home" href="/" asChild>
+            <NavButton icon="⌂">{isMobile ? 'Home' : 'Overzicht'}</NavButton>
+          </TabTrigger>
+          {(isDesktop ? disabledItems : [disabledItems[0], disabledItems[2]]).map((item) => (
+            <DisabledNavItem key={item.label} {...item} />
+          ))}
+          {isDesktop && <View style={styles.sidebarSpacer} />}
+          {isDesktop && <Text style={styles.navSectionLabel}>ONTDEK</Text>}
+          <TabTrigger key="explore" name="explore" href="/explore" asChild>
+            <NavButton icon="✧">{isMobile ? 'Ontdek' : 'Verkennen'}</NavButton>
+          </TabTrigger>
+
+          {isDesktop && (
+            <View style={styles.sidebarFooter}>
+              <View style={styles.footerAvatar}>
+                <Text style={styles.footerAvatarText}>C</Text>
+              </View>
+              <View>
+                <Text style={styles.footerTitle}>Jouw ruimte</Text>
+                <Text style={styles.footerSubtitle}>Samen plannen, samen doen</Text>
+              </View>
+            </View>
           )}
         </View>
       </TabList>
@@ -133,6 +164,11 @@ const styles = StyleSheet.create({
   mobileTabSlot: {
     marginLeft: 0,
   },
+  tabletTabSlot: {
+    height: 'auto',
+    marginLeft: 0,
+    marginTop: 76,
+  },
   navigation: {
     zIndex: 10,
   },
@@ -142,6 +178,7 @@ const styles = StyleSheet.create({
     bottom: 0,
     left: 0,
     width: 260,
+    flexDirection: 'column',
     paddingHorizontal: 20,
     paddingTop: 32,
     paddingBottom: 20,
@@ -169,6 +206,44 @@ const styles = StyleSheet.create({
     shadowRadius: 18,
     shadowOffset: { width: 0, height: 8 },
     elevation: 8,
+  },
+  tabletNavigation: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    height: 76,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingHorizontal: 24,
+    gap: 4,
+    borderBottomWidth: 1,
+    borderBottomColor: '#192B40',
+    backgroundColor: '#0A1728',
+  },
+  tabletBrand: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 9,
+  },
+  tabletBrandMark: {
+    width: 36,
+    height: 36,
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderRadius: 12,
+    backgroundColor: '#1C8DD5',
+  },
+  tabletBrandName: {
+    color: '#F5F9FF',
+    fontSize: 17,
+    fontWeight: '800',
+  },
+  tabletBrandTagline: {
+    color: '#8298B1',
+    fontSize: 9,
+    marginTop: 2,
   },
   brand: {
     flexDirection: 'row',
@@ -230,6 +305,12 @@ const styles = StyleSheet.create({
     gap: 3,
     borderRadius: 15,
   },
+  tabletNavButton: {
+    minHeight: 44,
+    flexDirection: 'row',
+    paddingHorizontal: 9,
+    gap: 6,
+  },
   navButtonActive: {
     backgroundColor: '#132B43',
   },
@@ -265,6 +346,15 @@ const styles = StyleSheet.create({
     bottom: 10,
     width: 3,
     borderRadius: 3,
+    backgroundColor: '#61C1FF',
+  },
+  tabletActiveIndicator: {
+    position: 'absolute',
+    bottom: 0,
+    left: 12,
+    right: 12,
+    height: 2,
+    borderRadius: 2,
     backgroundColor: '#61C1FF',
   },
   sidebarSpacer: {
