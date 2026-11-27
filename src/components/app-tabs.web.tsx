@@ -63,7 +63,11 @@ export default function AppTabs() {
     <Tabs>
       <TabSlot style={[styles.tabSlot, isDesktop ? styles.desktopTabSlot : styles.mobileTabSlot]} />
       <TabList asChild>
-        <View style={[styles.navigation, isDesktop ? styles.sidebar : styles.mobileNavigation]}>
+        <View
+          style={StyleSheet.flatten([
+            styles.navigation,
+            isDesktop ? styles.sidebar : styles.mobileNavigation,
+          ])}>
           {isDesktop ? (
             <>
               <View style={styles.brand}>
